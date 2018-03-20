@@ -7,11 +7,15 @@ public class Producer implements Runnable {
     ReentrantLock lock;
     Semaphore semFree;
     Semaphore semFull;
-    public Producer(ReentrantLock lock,Semaphore semFull,Semaphore semFree)
+    final Object condCons;
+    final Object condProd;
+    public Producer(ReentrantLock lock,Semaphore semFull,Semaphore semFree,Object condCons,Object condProd)
     {
         this.lock=lock;
         this.semFull=semFull;
         this.semFree=semFree;
+        this.condCons=condCons;
+        this.condProd=condProd;
     }
     @Override
     public void run() {
@@ -21,14 +25,24 @@ public class Producer implements Runnable {
                 Thread.sleep(1000);
             } catch (InterruptedException e) {
             }
-            try {
+           /* try {
                 semFree.acquire();
             } catch (InterruptedException e) {
                 e.printStackTrace();
-                continue;
+
             }
+            */
             synchronized (lock) {
-                  if (Main.deposit.size() < 5) {
+                      if(Main.deposit.size()==5)
+                      {
+                          try {
+                              synchronized (condProd) {
+                                  condProd.wait();
+                              }
+                          } catch (InterruptedException e) {
+                              e.printStackTrace();
+                          }
+                      }
                       if (!Main.deposit.contains(Random())) {
                           lock.lock();
                           System.out.println("Producer product a produs" + Random());
@@ -37,9 +51,12 @@ public class Producer implements Runnable {
                       } else {
                           System.out.println("Producer sleep");
                       }
-                  }
+
               }
-            semFull.release();
+              synchronized (condCons) {
+                  condCons.notify();
+              }
+          //  semFull.release();
 
         }
     }

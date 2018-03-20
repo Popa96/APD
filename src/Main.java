@@ -4,15 +4,17 @@ import java.util.concurrent.locks.ReentrantLock;
 
 public class Main {
 
-    public static  volatile LinkedList<Integer> deposit=new LinkedList<Integer>();
+    public static  volatile ArrayList<Integer> deposit=new ArrayList<Integer>();
 
 
     public static void main(String[] args) throws InterruptedException {
         ReentrantLock lock=new ReentrantLock();
         Semaphore semFree =new Semaphore(2);
         Semaphore semFull=new Semaphore(0);
-        Thread consumer=new Thread(new Consumer(lock,semFull,semFree));
-        Thread producer=new Thread(new Producer(lock,semFull,semFree));
+        final Object condProd=new Object();
+        final Object condCons=new Object();
+        Thread consumer=new Thread(new Consumer(lock,semFull,semFree,condCons,condProd));
+        Thread producer=new Thread(new Producer(lock,semFull,semFree,condCons,condProd));
 
         consumer.start();
         producer.start();

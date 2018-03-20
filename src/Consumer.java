@@ -6,32 +6,53 @@ public class Consumer implements Runnable {
     final ReentrantLock lock;
     Semaphore semFull;
     Semaphore semFree;
-    public Consumer(ReentrantLock lock,Semaphore semFull,Semaphore semFree)
+    final Object condCons;
+    final Object condProd;
+    public Consumer(ReentrantLock lock,Semaphore semFull,Semaphore semFree,Object condCons,Object condProd)
     {
         this.lock=lock;
         this.semFull=semFull;
         this.semFree=semFree;
+        this.condCons=condCons;
+        this.condProd=condProd;
     }
 
     @Override
     public void run() {
         while (true) {
             int consum = Random();
-            try {
+           /* try {
                 semFull.acquire();
             }catch (Exception e) {
                 e.printStackTrace();
-                continue;
-            }
+
+            }*/
+
+
+
                 synchronized (lock) {
+                    if(Main.deposit.size()==0)
+                    {
+                        try {
+                            synchronized (condCons) {
+                                condCons.wait();
+                            }
+                        } catch (InterruptedException e) {
+                            e.printStackTrace();
+                            break;
+                        }
+                    }
                     if (Main.deposit.contains(consum) && !Main.deposit.isEmpty()) {
                         lock.lock();
-                        System.out.println("Consumer consum a product" + consum);
-                        Main.deposit.remove();
+                        System.out.println("Consumer consum a produs" + consum);
+                        Main.deposit.remove(Random());
                         lock.unlock();
                     }
                 }
-                semFree.release();
+                synchronized (condProd) {
+                    condProd.notify();
+                }
+                //semFree.release();
                 try {
                     System.out.println("Consumer sleep");
                     Thread.sleep(1000);
