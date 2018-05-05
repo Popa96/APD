@@ -30,8 +30,6 @@ public class Main {
                 for (int j = 0; j < NR; j++) {
                     if (matrixGraph[0][k] + matrixGraph[k][j] < matrixGraph[0][j]) {
                         matrixGraph[0][j] = matrixGraph[0][k] + matrixGraph[k][j];
-                    } else {
-                        matrixGraph[0][j] = matrixGraph[0][j];
                     }
                 }
             }
@@ -49,8 +47,6 @@ public class Main {
                 for (int j = 0; j < NR; j++) {
                     if (matrixGraph[rank][k] + matrixGraph[k][j] < matrixGraph[rank][j]) {
                         matrixGraph[rank][j] = matrixGraph[rank][k] + matrixGraph[k][j];
-                    } else {
-                        matrixGraph[rank][j] = matrixGraph[rank][j];
                     }
                 }
             }
